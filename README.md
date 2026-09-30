@@ -11,7 +11,8 @@ muestra un diagnóstico de su estructura. La segunda etapa analiza las V de
 y escalabilidad mediante mediciones y proyecciones reproducibles. La cuarta
 demuestra **Velocidad** mediante un flujo local de eventos sintéticos. La
 quinta transforma los registros en información descriptiva para demostrar la
-V de **Valor**.
+V de **Valor**. La sexta convierte resultados de las cinco V en
+visualizaciones académicas estáticas.
 
 ## Estructura
 
@@ -19,8 +20,8 @@ V de **Valor**.
 SpotifyBigData/
 ├── data/                 # Dataset CSV original
 ├── outputs/
-│   ├── graficas/         # Reservado para etapas posteriores
-│   └── reportes/         # Reservado para etapas posteriores
+│   ├── graficas/         # Figuras PNG para la exposición
+│   └── reportes/         # Resultados tabulares y catálogo de figuras
 ├── src/
 │   ├── __init__.py
 │   ├── carga.py
@@ -30,6 +31,7 @@ SpotifyBigData/
 │   ├── valor.py
 │   ├── variedad.py
 │   ├── velocidad.py
+│   ├── visualizacion.py
 │   └── volumen.py
 ├── .gitignore
 ├── main.py
@@ -304,6 +306,47 @@ No representan necesariamente el comportamiento actual de toda la plataforma
 Spotify.
 
 **Correlación no implica causalidad.**
+
+## Visualizaciones
+
+La etapa de visualización transforma resultados ya calculados en ocho figuras
+estáticas preparadas para una exposición. No vuelve a implementar los análisis:
+`main.py` entrega a `visualizacion.py` los DataFrames de Veracidad, Volumen,
+Velocidad y Valor disponibles durante la misma ejecución.
+
+Las imágenes se guardan automáticamente en `outputs/graficas/` como PNG a 160
+dpi. Se utiliza el backend no interactivo `Agg`, por lo que `python main.py`
+no abre ventanas ni requiere intervención manual.
+
+| Gráfica | Tema y V relacionada | Naturaleza |
+|---|---|---|
+| `01_proyeccion_volumen.png` | Disco y RAM por escala — Volumen | Medición real en x1 y proyección matemática desde x10 |
+| `02_benchmark_carga.png` | Tiempo de carga — Volumen | Medición real local |
+| `03_velocidad_eventos.png` | Eventos frente a tiempo — Velocidad | Simulación sintética local |
+| `04_calidad_datos.png` | Faltantes, duplicados y sospechas — Veracidad | Análisis descriptivo de datos reales |
+| `05_generos_popularidad.png` | Top 10 de géneros — Valor y Variedad | Análisis descriptivo |
+| `06_explicit_popularidad.png` | Explicit frente a no explicit — Valor | Análisis descriptivo |
+| `07_correlaciones_popularidad.png` | Popularidad y atributos — Valor | Análisis descriptivo; no causal |
+| `08_perfil_alta_popularidad.png` | Cuartil superior frente al resto — Valor | Análisis descriptivo |
+
+La proyección de Volumen emplea ejes logarítmicos para representar órdenes de
+magnitud sin ocultar la medición base. El gráfico de calidad distingue los
+valores potencialmente sospechosos de las incidencias detectadas y no presenta
+outliers como errores. El perfil musical compara exclusivamente atributos
+normalizados; `tempo` y `duration_ms` se excluyen porque sus unidades harían
+engañosa una escala compartida.
+
+El catálogo de figuras, su origen y la naturaleza de la evidencia queda
+registrado en:
+
+```text
+outputs/reportes/resumen_visualizaciones.csv
+```
+
+Las mediciones de carga dependen del equipo y de su caché. Los eventos de
+Velocidad son sintéticos y no representan la infraestructura real de Spotify.
+Las comparaciones de popularidad describen únicamente este dataset y no
+demuestran causalidad.
 
 ## Conservación de los datos
 

@@ -1,0 +1,9 @@
+archivo,titulo,tema,v_relacionada,origen_datos,naturaleza
+01_proyeccion_volumen.png,Crecimiento proyectado del volumen,Disco y RAM por escala,Volumen,proyeccion_escalabilidad,medición real (x1) y estimación matemática (x10+)
+02_benchmark_carga.png,Tiempo de carga según cantidad de registros,Costo local de lectura,Volumen,benchmark_carga,medición real local
+03_velocidad_eventos.png,Tiempo de procesamiento del flujo sintético,Eventos y tiempo mediano,Velocidad,benchmark_velocidad,simulación sintética local
+04_calidad_datos.png,Indicadores de calidad del dataset,"Faltantes, duplicados y valores sospechosos",Veracidad,resúmenes y consistencia de calidad,análisis descriptivo de datos reales
+05_generos_popularidad.png,Géneros con mayor mediana de popularidad,Top 10 de géneros,Valor / Variedad,analisis_generos,análisis descriptivo
+06_explicit_popularidad.png,Popularidad mediana: Explicit vs No explicit,Comparación de grupos,Valor,comparacion_explicit,análisis descriptivo
+07_correlaciones_popularidad.png,Correlación entre popularidad y atributos musicales,Correlaciones de Pearson,Valor,correlaciones_popularidad,análisis descriptivo
+08_perfil_alta_popularidad.png,Perfil musical: alta popularidad vs resto,Medianas de atributos normalizados,Valor,perfil_alta_popularidad,análisis descriptivo

@@ -2,6 +2,7 @@
 
 from collections.abc import Hashable
 from numbers import Real
+from pathlib import Path
 from time import perf_counter
 
 import pandas as pd
@@ -82,6 +83,7 @@ from src.valor import (
     generar_hallazgos_valor,
     guardar_reportes_valor,
 )
+from src.visualizacion import generar_visualizaciones
 
 
 ANCHO = 72
@@ -549,6 +551,16 @@ def imprimir_valor(
     print(generar_conclusion_valor(resumen))
 
 
+def imprimir_visualizaciones(rutas: list[Path], duracion_segundos: float) -> None:
+    """Enumera las figuras guardadas sin mostrar ventanas interactivas."""
+    imprimir_titulo("[13] VISUALIZACIONES")
+    print(f"Gráficas generadas: {len(rutas)}")
+    for ruta in rutas:
+        print(f"- {ruta.relative_to(RAIZ_PROYECTO)}")
+    print(f"Duración de generación: {duracion_segundos:.3f} s")
+    print("Formato: PNG estático, 160 dpi; no se abrieron ventanas interactivas.")
+
+
 def ejecutar_diagnostico() -> None:
     """Carga el CSV y presenta su diagnóstico en la terminal."""
     inicio_programa = perf_counter()
@@ -717,6 +729,26 @@ def ejecutar_diagnostico() -> None:
         resumen_valor,
         consistencia_vista,
         hallazgos_valor,
+    )
+
+    inicio_visualizaciones = perf_counter()
+    rutas_visualizaciones, _ = generar_visualizaciones(
+        RAIZ_PROYECTO / "outputs" / "graficas",
+        directorio_reportes,
+        proyeccion,
+        benchmark_carga,
+        benchmark_velocidad,
+        resumen_faltantes,
+        resumen_duplicados,
+        consistencia,
+        analisis_generos,
+        comparacion_explicit,
+        correlaciones_popularidad,
+        perfil_alta_popularidad,
+    )
+    imprimir_visualizaciones(
+        rutas_visualizaciones,
+        perf_counter() - inicio_visualizaciones,
     )
 
     print("\nReportes guardados en: outputs/reportes/")
