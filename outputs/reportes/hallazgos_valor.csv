@@ -1,0 +1,6 @@
+categoria,hallazgo,metrica,valor
+géneros,pop presenta la mayor mediana de popularity dentro de los géneros del dataset.,popularidad_mediana,66.0
+géneros,acoustic es uno de los géneros con mayor cantidad de asociaciones únicas track-género.,tracks_unicos,1000.0
+correlaciones,instrumentalness tiene la mayor correlación absoluta observada con popularity; correlación no implica causalidad.,correlacion_pearson,-0.12746038614846303
+explicit,Los tracks explicit representan 8.58% de la vista única; el grupo explicit presenta la mayor mediana descriptiva de popularity.,porcentaje_explicit,8.584704872912047
+perfil_alta_popularidad,"En valence, el grupo del cuartil superior presenta mediana 0.430000 frente a 0.469000 en el resto.",valence,-0.03899999999999998

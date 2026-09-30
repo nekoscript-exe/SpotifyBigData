@@ -1,0 +1,15 @@
+metrica,valor,unidad,descripcion
+tracks_unicos,89741.0,tracks,Canciones diferentes por track_id
+creditos_artisticos_unicos,31437.0,créditos,"Valores textuales distintos de artists, sin dividir colaboraciones"
+albumes_unicos,46589.0,álbumes,Álbumes distintos entre los tracks únicos
+popularidad_media,33.19789171058936,puntos,Media de popularity agregada por track_id
+popularidad_mediana,33.0,puntos,Mediana de popularity agregada por track_id
+duracion_media,229141.81218172295,ms,Duración media de los tracks únicos
+tempo_medio,122.05831623226841,BPM,Tempo medio
+porcentaje_explicit,8.584704872912047,%,Porcentaje de tracks marcados como explicit
+promedio_danceability,0.5621656734380049,índice 0-1,Promedio descriptivo de danceability
+promedio_energy,0.6344578983586098,índice 0-1,Promedio descriptivo de energy
+promedio_valence,0.4694773852642605,índice 0-1,Promedio descriptivo de valence
+promedio_acousticness,0.32828900048350257,índice 0-1,Promedio descriptivo de acousticness
+promedio_instrumentalness,0.1734134829215186,índice 0-1,Promedio descriptivo de instrumentalness
+promedio_liveness,0.21696951906040718,índice 0-1,Promedio descriptivo de liveness
