@@ -1,0 +1,6 @@
+tipo_evento,cantidad,porcentaje,naturaleza
+play,45149,45.149,evento sintético académico
+pause,14905,14.905,evento sintético académico
+skip,25020,25.019999999999996,evento sintético académico
+like,9908,9.908,evento sintético académico
+add_to_playlist,5018,5.018000000000001,evento sintético académico
