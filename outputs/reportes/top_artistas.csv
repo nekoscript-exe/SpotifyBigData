@@ -1,0 +1,31 @@
+criterio,ranking,unidad_analisis,artists,tracks_unicos,popularidad_media,popularidad_mediana
+mayor_numero_tracks,1,crédito artístico textual,George Jones,260,16.56153846153846,13.0
+mayor_numero_tracks,2,crédito artístico textual,my little airport,171,33.21637426900585,32.0
+mayor_numero_tracks,3,crédito artístico textual,The Beatles,149,60.31543624161074,59.0
+mayor_numero_tracks,4,crédito artístico textual,BTS,143,67.8881118881119,67.0
+mayor_numero_tracks,5,crédito artístico textual,Håkan Hellström,141,30.663120567375888,30.0
+mayor_numero_tracks,6,crédito artístico textual,Glee Cast,139,38.84172661870504,44.0
+mayor_numero_tracks,7,crédito artístico textual,Hank Williams,136,13.455882352941176,12.0
+mayor_numero_tracks,8,crédito artístico textual,Linkin Park,133,51.766917293233085,51.0
+mayor_numero_tracks,9,crédito artístico textual,Scooter,130,23.465384615384615,21.0
+mayor_numero_tracks,10,crédito artístico textual,OneRepublic,124,35.86290322580645,48.0
+mayor_numero_tracks,11,crédito artístico textual,CoComelon,122,49.368852459016395,48.0
+mayor_numero_tracks,12,crédito artístico textual,Ella Fitzgerald,111,0.990990990990991,0.0
+mayor_numero_tracks,13,crédito artístico textual,Arctic Monkeys,110,56.627272727272725,59.5
+mayor_numero_tracks,14,crédito artístico textual,Dean Martin,110,2.3727272727272726,0.0
+mayor_numero_tracks,15,crédito artístico textual,Charlie Brown Jr.,106,39.386792452830186,38.0
+mayor_popularidad_mediana_min_5_tracks,1,crédito artístico textual,Olivia Rodrigo,5,87.4,88.0
+mayor_popularidad_mediana_min_5_tracks,2,crédito artístico textual,Bad Bunny,22,85.27272727272727,84.0
+mayor_popularidad_mediana_min_5_tracks,3,crédito artístico textual,Lil Nas X,5,83.2,83.0
+mayor_popularidad_mediana_min_5_tracks,4,crédito artístico textual,Måneskin,5,82.6,83.0
+mayor_popularidad_mediana_min_5_tracks,5,crédito artístico textual,One Direction,5,83.0,83.0
+mayor_popularidad_mediana_min_5_tracks,6,crédito artístico textual,Bruno Mars,7,48.57142857142857,82.0
+mayor_popularidad_mediana_min_5_tracks,7,crédito artístico textual,Ariana Grande,9,80.77777777777777,81.0
+mayor_popularidad_mediana_min_5_tracks,8,crédito artístico textual,Doja Cat,8,62.875,81.0
+mayor_popularidad_mediana_min_5_tracks,9,crédito artístico textual,Eminem,6,81.16666666666667,80.0
+mayor_popularidad_mediana_min_5_tracks,10,crédito artístico textual,Sia,9,44.666666666666664,78.0
+mayor_popularidad_mediana_min_5_tracks,11,crédito artístico textual,Mitski,6,78.33333333333333,78.0
+mayor_popularidad_mediana_min_5_tracks,12,crédito artístico textual,Taylor Swift,11,46.36363636363637,77.0
+mayor_popularidad_mediana_min_5_tracks,13,crédito artístico textual,Gorillaz,6,53.833333333333336,77.0
+mayor_popularidad_mediana_min_5_tracks,14,crédito artístico textual,Frank Ocean,17,74.70588235294117,76.0
+mayor_popularidad_mediana_min_5_tracks,15,crédito artístico textual,Calvin Harris,5,68.8,76.0

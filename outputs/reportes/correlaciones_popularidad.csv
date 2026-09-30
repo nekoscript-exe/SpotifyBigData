@@ -1,0 +1,11 @@
+atributo,correlacion_pearson,correlacion_absoluta,interpretacion
+instrumentalness,-0.12746038614846303,0.12746038614846303,asociación descriptiva; no implica causalidad
+loudness,0.07170695891554674,0.07170695891554674,asociación descriptiva; no implica causalidad
+danceability,0.06428046790273247,0.06428046790273247,asociación descriptiva; no implica causalidad
+speechiness,-0.047076936119752374,0.047076936119752374,asociación descriptiva; no implica causalidad
+acousticness,-0.038902579000846045,0.038902579000846045,asociación descriptiva; no implica causalidad
+duration_ms,-0.023126984613926958,0.023126984613926958,asociación descriptiva; no implica causalidad
+liveness,-0.013865260234835464,0.013865260234835464,asociación descriptiva; no implica causalidad
+energy,0.013763684968846506,0.013763684968846506,asociación descriptiva; no implica causalidad
+valence,-0.011539601190767346,0.011539601190767346,asociación descriptiva; no implica causalidad
+tempo,0.007296333561418418,0.007296333561418418,asociación descriptiva; no implica causalidad

@@ -66,6 +66,22 @@ from src.velocidad import (
     guardar_reportes_velocidad,
     obtener_track_ids_reales,
 )
+from src.valor import (
+    ConsistenciaVistaTracks,
+    ResumenValor,
+    construir_vista_tracks_unicos,
+    crear_analisis_generos,
+    crear_comparacion_explicit,
+    crear_correlaciones_popularidad,
+    crear_perfil_alta_popularidad,
+    crear_resumen_general,
+    crear_resumen_valor,
+    crear_top_artistas,
+    crear_top_canciones,
+    generar_conclusion_valor,
+    generar_hallazgos_valor,
+    guardar_reportes_valor,
+)
 
 
 ANCHO = 72
@@ -429,6 +445,110 @@ def imprimir_velocidad(
     print(generar_conclusion_velocidad(medicion_representativa))
 
 
+def imprimir_valor(
+    top_canciones: pd.DataFrame,
+    resumen: ResumenValor,
+    consistencia: ConsistenciaVistaTracks,
+    hallazgos: pd.DataFrame,
+) -> None:
+    """Presenta los hallazgos descriptivos principales de la etapa Valor."""
+    imprimir_titulo("[12] VALOR — INFORMACIÓN ÚTIL EXTRAÍDA DE LOS DATOS")
+    print(f"Tracks únicos analizados:       {resumen['tracks_unicos']:,}")
+    print(f"Popularidad media/mediana:      {resumen['popularidad_media']:.3f} / "
+          f"{resumen['popularidad_mediana']:.3f}")
+    print(
+        "Estrategia de consolidación:   una fila por track_id; mediana para "
+        "popularity"
+    )
+    print(
+        "IDs con popularity variable:  "
+        f"{consistencia['ids_con_popularidad_variable']:,}"
+    )
+    print(
+        "Columnas estables verificadas: "
+        f"{consistencia['columnas_estables_verificadas']:,}"
+    )
+
+    print("\nTOP 5 CANCIONES POR POPULARITY DENTRO DEL DATASET")
+    columnas_top = ["track_name", "artists", "popularity"]
+    for posicion, valores in enumerate(
+        top_canciones[columnas_top].head(5).itertuples(index=False, name=None),
+        start=1,
+    ):
+        popularidad = convertir_numero(valores[2], "popularidad de canción top")
+        print(f"{posicion}. {valores[0]} — {valores[1]} ({popularidad:g})")
+
+    print("\nCRÉDITOS ARTÍSTICOS")
+    print(
+        "Mayor cantidad de tracks únicos: "
+        f"{resumen['credito_mas_tracks']} "
+        f"({resumen['credito_mas_tracks_cantidad']:,})"
+    )
+    print(
+        f"Mayor mediana con al menos {resumen['umbral_tracks_credito']} tracks: "
+        f"{resumen['credito_mayor_popularidad']} "
+        f"({resumen['credito_mayor_popularidad_mediana']:.3f}; "
+        f"{resumen['credito_mayor_popularidad_tracks']} tracks)"
+    )
+    print("Las colaboraciones se conservan como créditos textuales; no se dividieron.")
+
+    print("\nGÉNEROS — ASOCIACIONES ÚNICAS TRACK_ID + TRACK_GENRE")
+    print(
+        "Mayor mediana de popularity:    "
+        f"{resumen['genero_mayor_popularidad']} "
+        f"({resumen['genero_mayor_popularidad_mediana']:.3f}; "
+        f"{resumen['genero_mayor_popularidad_tracks']:,} tracks)"
+    )
+    print(
+        "Uno de los máximos por tracks:  "
+        f"{resumen['genero_mas_tracks']} "
+        f"({resumen['genero_mas_tracks_cantidad']:,})"
+    )
+
+    print("\nEXPLICIT VS NO EXPLICIT")
+    print(
+        f"Explicit:    {resumen['explicit_cantidad']:,} "
+        f"({resumen['explicit_porcentaje']:.3f}%) | "
+        f"mediana popularity {resumen['explicit_popularidad_mediana']:.3f}"
+    )
+    print(
+        f"No explicit: {resumen['no_explicit_cantidad']:,} "
+        f"({resumen['no_explicit_porcentaje']:.3f}%) | "
+        f"mediana popularity {resumen['no_explicit_popularidad_mediana']:.3f}"
+    )
+    print("La diferencia observada es descriptiva; no demuestra causalidad.")
+
+    print("\nPOPULARITY Y ATRIBUTOS")
+    print(
+        "Mayor correlación absoluta:     "
+        f"{resumen['correlacion_atributo']} "
+        f"(r = {resumen['correlacion_valor']:.6f})"
+    )
+    print("Correlación no implica causalidad.")
+
+    print("\nPERFIL DE ALTA POPULARIDAD")
+    print(
+        "Grupo alto: popularity >= Q3 "
+        f"({resumen['umbral_alta_popularidad']:.3f}); "
+        f"{resumen['tracks_alta_popularidad']:,} tracks frente a "
+        f"{resumen['tracks_resto']:,} en el resto."
+    )
+    print(
+        f"Mayor diferencia normalizada: {resumen['perfil_atributo_destacado']} "
+        f"{resumen['perfil_mediana_alta']:.6f} frente a "
+        f"{resumen['perfil_mediana_resto']:.6f}."
+    )
+
+    print("\nHALLAZGOS AUTOMÁTICOS")
+    for numero, hallazgo in enumerate(
+        hallazgos["hallazgo"].astype(str).tolist(), start=1
+    ):
+        print(f"{numero}. {hallazgo}")
+
+    print("\nConclusión — VALOR")
+    print(generar_conclusion_valor(resumen))
+
+
 def ejecutar_diagnostico() -> None:
     """Carga el CSV y presenta su diagnóstico en la terminal."""
     inicio_programa = perf_counter()
@@ -560,6 +680,43 @@ def ejecutar_diagnostico() -> None:
         benchmark_velocidad,
         mediciones_velocidad[CANTIDAD_EVENTOS_RESUMEN],
         resumen_flujo,
+    )
+
+    vista_tracks, consistencia_vista = construir_vista_tracks_unicos(dataframe)
+    resumen_general_valor = crear_resumen_general(vista_tracks)
+    top_canciones = crear_top_canciones(vista_tracks)
+    top_artistas, umbral_artistas = crear_top_artistas(vista_tracks)
+    analisis_generos = crear_analisis_generos(dataframe, vista_tracks)
+    comparacion_explicit = crear_comparacion_explicit(vista_tracks)
+    correlaciones_popularidad = crear_correlaciones_popularidad(vista_tracks)
+    perfil_alta_popularidad = crear_perfil_alta_popularidad(vista_tracks)
+    resumen_valor = crear_resumen_valor(
+        vista_tracks,
+        top_canciones,
+        top_artistas,
+        umbral_artistas,
+        analisis_generos,
+        comparacion_explicit,
+        correlaciones_popularidad,
+        perfil_alta_popularidad,
+    )
+    hallazgos_valor = generar_hallazgos_valor(resumen_valor)
+    guardar_reportes_valor(
+        directorio_reportes,
+        resumen_general_valor,
+        top_canciones,
+        top_artistas,
+        analisis_generos,
+        comparacion_explicit,
+        correlaciones_popularidad,
+        perfil_alta_popularidad,
+        hallazgos_valor,
+    )
+    imprimir_valor(
+        top_canciones,
+        resumen_valor,
+        consistencia_vista,
+        hallazgos_valor,
     )
 
     print("\nReportes guardados en: outputs/reportes/")

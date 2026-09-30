@@ -9,7 +9,9 @@ El programa localiza el único CSV de `data/`, lo carga sin modificarlo y
 muestra un diagnóstico de su estructura. La segunda etapa analiza las V de
 **Veracidad** y **Variedad**. La tercera estudia **Volumen**, rendimiento local
 y escalabilidad mediante mediciones y proyecciones reproducibles. La cuarta
-demuestra **Velocidad** mediante un flujo local de eventos sintéticos.
+demuestra **Velocidad** mediante un flujo local de eventos sintéticos. La
+quinta transforma los registros en información descriptiva para demostrar la
+V de **Valor**.
 
 ## Estructura
 
@@ -25,6 +27,7 @@ SpotifyBigData/
 │   ├── calidad.py
 │   ├── diagnostico.py
 │   ├── rendimiento.py
+│   ├── valor.py
 │   ├── variedad.py
 │   ├── velocidad.py
 │   └── volumen.py
@@ -68,8 +71,8 @@ python main.py
 
 El diagnóstico informa dimensiones, variables, tipos de datos, tamaños,
 valores faltantes, duplicados, primeras filas y estadísticas descriptivas.
-También presenta en la terminal un resumen de Veracidad y Variedad. Los
-detalles se escriben en `outputs/reportes/`.
+También presenta en la terminal resúmenes de Veracidad, Variedad, Volumen,
+Velocidad y Valor. Los detalles se escriben en `outputs/reportes/`.
 
 ## Veracidad
 
@@ -234,6 +237,74 @@ conexión en tiempo real con Spotify.
 > sección son sintéticos y se generan exclusivamente con fines académicos. Los
 > resultados no representan métricas de la infraestructura real de Spotify.
 
+## Valor
+
+La V de Valor responde qué información útil puede obtenerse de los datos. En
+esta etapa, los metadatos y atributos acústicos se convierten en comparaciones
+comprensibles sobre canciones, créditos artísticos, géneros, popularidad y
+grupos descriptivos.
+
+### Vista analítica de tracks únicos
+
+Una fila del CSV no equivale necesariamente a una canción distinta, ya que un
+mismo `track_id` puede aparecer asociado a varios géneros. Por eso se construye
+en memoria una vista con una fila por `track_id`, sin alterar el DataFrame ni
+el CSV originales. Antes de consolidarla se comprueba la consistencia de los
+metadatos y atributos que deberían permanecer fijos.
+
+Las columnas estables conservan su valor. `popularity` se resume mediante la
+mediana de cada `track_id`, una medida explícita y robusta ante sus distintas
+apariciones. Esas variaciones no se interpretan como evolución temporal porque
+el dataset carece de timestamps que permitan sostener esa conclusión.
+
+Los géneros se modelan por separado como una relación muchos-a-muchos. Los
+análisis utilizan asociaciones únicas `track_id + track_genre`, de modo que no
+se fuerza un solo género por canción ni se cuenta dos veces una relación
+idéntica. Todo esto constituye una transformación analítica temporal, no una
+limpieza del dataset fuente.
+
+### Análisis descriptivos
+
+La etapa calcula:
+
+- un panorama general de tracks, créditos, álbumes, popularidad, duración,
+  tempo, contenido explícito y características acústicas;
+- las canciones con mayor `popularity` dentro de este dataset;
+- créditos artísticos con más tracks y con mayor mediana de popularidad;
+- cantidad de tracks, popularidad y perfil acústico por género;
+- diferencias descriptivas entre tracks `explicit` y `no_explicit`;
+- correlaciones de Pearson entre `popularity` y atributos musicales;
+- el perfil del cuartil superior de popularidad frente al resto.
+
+La columna `artists` puede representar colaboraciones. Como separar sus
+componentes sería ambiguo sin una especificación formal, los valores se
+analizan como **créditos artísticos textuales**, exactamente como aparecen. La
+comparación de popularidad exige un mínimo de tracks por crédito: se usa el
+mayor valor entre cinco tracks y el percentil 90 de la distribución observada.
+
+El grupo de alta popularidad se define mediante el tercer cuartil calculado
+sobre la vista única, no mediante un umbral fijo elegido de antemano. Las
+diferencias son asociaciones descriptivas y no permiten atribuir causas.
+
+Los reportes preparados para análisis o visualizaciones posteriores son:
+
+```text
+outputs/reportes/resumen_valor.csv
+outputs/reportes/top_canciones_populares.csv
+outputs/reportes/top_artistas.csv
+outputs/reportes/analisis_generos.csv
+outputs/reportes/comparacion_explicit.csv
+outputs/reportes/correlaciones_popularidad.csv
+outputs/reportes/perfil_alta_popularidad.csv
+outputs/reportes/hallazgos_valor.csv
+```
+
+Los análisis son descriptivos y corresponden únicamente al dataset utilizado.
+No representan necesariamente el comportamiento actual de toda la plataforma
+Spotify.
+
+**Correlación no implica causalidad.**
+
 ## Conservación de los datos
 
 En estas etapas no se modifica ni limpia el dataset original. No se rellenan
@@ -241,3 +312,5 @@ faltantes, no se eliminan duplicados, no se corrigen valores sospechosos y no
 se descartan outliers. Tampoco se generan físicamente datasets escalados. Todos
 los resultados derivados se guardan fuera de `data/`. La simulación de
 Velocidad tampoco modifica el CSV ni guarda eventos individuales.
+La vista de tracks únicos y las relaciones track-género de Valor existen solo
+en memoria; tampoco reemplazan ni sobrescriben registros originales.
