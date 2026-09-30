@@ -1,359 +1,309 @@
 # SpotifyBigData
 
-Proyecto universitario de la materia **Manejo Masivo de Datos / Big Data**. Su
-objetivo es estudiar los fundamentos de Big Data y explicar las cinco V
-(volumen, velocidad, variedad, veracidad y valor) mediante un dataset de
-canciones de Spotify.
+## Descripción
 
-El programa localiza el único CSV de `data/`, lo carga sin modificarlo y
-muestra un diagnóstico de su estructura. La segunda etapa analiza las V de
-**Veracidad** y **Variedad**. La tercera estudia **Volumen**, rendimiento local
-y escalabilidad mediante mediciones y proyecciones reproducibles. La cuarta
-demuestra **Velocidad** mediante un flujo local de eventos sintéticos. La
-quinta transforma los registros en información descriptiva para demostrar la
-V de **Valor**. La sexta convierte resultados de las cinco V en
-visualizaciones académicas estáticas.
+SpotifyBigData es un proyecto universitario de **Manejo Masivo de Datos / Big
+Data**. Utiliza un dataset público relacionado con Spotify como caso de estudio
+para explicar las cinco V de Big Data mediante análisis reproducibles con
+Python y pandas.
 
-## Estructura
+El proyecto diagnostica el CSV, evalúa su calidad y variedad, mide su volumen,
+ejecuta benchmarks locales, simula un flujo de eventos, obtiene hallazgos
+descriptivos y genera reportes y visualizaciones estáticas.
+
+No reproduce la arquitectura interna de Spotify ni se conecta a su API. Es una
+demostración académica sobre una muestra finita.
+
+## Objetivo académico
+
+El objetivo es mostrar el recorrido completo desde datos crudos hasta evidencia
+útil:
+
+```text
+CSV original
+    ↓
+diagnóstico y controles de calidad
+    ↓
+mediciones, simulaciones y proyecciones diferenciadas
+    ↓
+análisis descriptivos
+    ↓
+reportes y visualizaciones para comunicar resultados
+```
+
+La prioridad es distinguir correctamente qué se midió, qué se simuló, qué se
+proyectó y qué solo puede interpretarse de forma descriptiva.
+
+## Caso de estudio: Spotify
+
+Una plataforma musical es un caso intuitivo para estudiar las cinco V: combina
+catálogos extensos, metadatos textuales, categorías, características acústicas
+y flujos de interacción. El CSV utilizado contiene información sobre tracks,
+pero no contiene tráfico real de usuarios, reproducciones en vivo ni la
+infraestructura de Spotify.
+
+Por esa razón, el proyecto utiliza el dataset para Veracidad, Variedad, Volumen
+y Valor, mientras que Velocidad se representa mediante eventos sintéticos con
+`track_id` que sí existen en el CSV.
+
+## Dataset
+
+Archivo analizado:
+
+```text
+data/spotify-tracks-dataset-detailed.csv
+```
+
+| Característica                | Valor observado |
+| ------------------------------ | --------------: |
+| Filas                          |         114,000 |
+| Columnas                       |              20 |
+| Tamaño del CSV en disco       |        18.53 MB |
+| Memoria profunda del DataFrame |        48.79 MB |
+
+El tamaño serializado en disco no equivale a la memoria necesaria durante el
+procesamiento. pandas debe representar índices, objetos y cadenas en memoria,
+por lo que el DataFrame ocupa más que el archivo CSV.
+
+El análisis nunca sobrescribe, limpia ni modifica el dataset original. Su
+SHA-256 esperado es:
+
+```text
+db8cd3670209db33285dbfa7ad08dc05446219e9c430e7750abfd17e99297c42
+```
+
+## Las 5 V de Big Data
+
+| V                   | Cómo se demuestra en el proyecto                                                                   | Evidencia principal                                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Volumen**   | Tamaño en disco y RAM, benchmark de carga y escalas proyectadas                                    | `benchmark_carga.csv`, `proyeccion_escalabilidad.csv`, gráfica 01 |
+| **Velocidad** | Generación incremental y procesamiento de eventos sintéticos sin acumular todo el flujo           | `benchmark_velocidad.csv`, `resumen_eventos.csv`, gráfica 03      |
+| **Variedad**  | Tipos técnicos y semánticos: texto, categorías, booleanos, métricas e identificadores           | `resumen_variedad.csv`                                               |
+| **Veracidad** | Faltantes, duplicados exactos, IDs repetidos, reglas de consistencia y outliers informativos        | reportes de calidad, gráfica 04                                       |
+| **Valor**     | Tracks únicos, créditos, géneros, contenido explicit, correlaciones y perfil de popularidad alta | reportes de Valor, gráficas 05–08                                    |
+
+### Volumen
+
+Se miden las filas, columnas, bytes en disco y memoria del DataFrame. La carga
+del CSV y varias operaciones comunes se repiten tres veces y se resume su
+mediana. Las escalas x10 a x1,000,000 son cálculos matemáticos: no se crean
+datasets gigantes ni se presentan esas cifras como mediciones reales.
+
+### Velocidad
+
+El CSV no contiene eventos reales ni timestamps de usuarios. La simulación
+produce un evento a la vez mediante un generador de Python y lo procesa de
+forma incremental. Cada evento contiene:
+
+```text
+timestamp   instante sintético desde una fecha fija
+user_id     usuario sintético
+track_id    identificador real tomado del dataset
+evento      play, pause, skip, like o add_to_playlist
+```
+
+Se usa la semilla fija `42`. Las probabilidades —45% `play`, 25% `skip`, 15%
+`pause`, 10% `like` y 5% `add_to_playlist`— son decisiones de la simulación,
+no estadísticas de Spotify. El benchmark mide generación y procesamiento para
+10,000, 50,000, 100,000, 250,000 y 500,000 eventos.
+
+### Variedad
+
+Se distinguen los dtypes técnicos de su significado semántico. Por ejemplo,
+`key` se almacena como entero, pero conceptualmente es una categoría musical.
+También se calcula la cardinalidad de cada columna para reconocer variables
+identificadoras, textuales, categóricas, binarias y métricas.
+
+### Veracidad
+
+Se estudian valores faltantes, duplicados exactos, `track_id` repetidos, rangos
+esperados y valores potencialmente sospechosos. Una fila duplicada no equivale
+a un ID repetido: la misma canción puede estar asociada a distintos géneros.
+
+Los outliers de duración, tempo y sonoridad se detectan con IQR únicamente para
+investigarlos. **Valor atípico no significa dato incorrecto.** En esta etapa no
+se eliminan, rellenan ni corrigen registros.
+
+### Valor
+
+Para no contar cada fila como una canción independiente se construye en memoria
+una vista con una fila por `track_id`. Los metadatos y atributos estables se
+conservan; cuando `popularity` varía entre apariciones se utiliza su mediana.
+Los géneros mantienen una relación muchos-a-muchos mediante asociaciones únicas
+`track_id + track_genre`.
+
+El análisis compara canciones, créditos artísticos, géneros, grupos explicit y
+no explicit, correlaciones de Pearson y el cuartil superior de popularidad. Los
+resultados corresponden solo a este dataset. **Correlación no implica
+causalidad.**
+
+## Estructura del proyecto
 
 ```text
 SpotifyBigData/
-├── data/                 # Dataset CSV original
+├── data/
+│   └── spotify-tracks-dataset-detailed.csv
 ├── outputs/
-│   ├── graficas/         # Figuras PNG para la exposición
-│   └── reportes/         # Resultados tabulares y catálogo de figuras
+│   ├── graficas/          # Ocho PNG para la exposición
+│   └── reportes/          # Reportes CSV de todas las etapas
 ├── src/
 │   ├── __init__.py
-│   ├── carga.py
-│   ├── calidad.py
-│   ├── diagnostico.py
-│   ├── rendimiento.py
-│   ├── valor.py
-│   ├── variedad.py
-│   ├── velocidad.py
-│   ├── visualizacion.py
-│   └── volumen.py
-├── .gitignore
+│   ├── carga.py           # Localización y carga portable del CSV
+│   ├── diagnostico.py     # Diagnóstico inicial
+│   ├── calidad.py         # Veracidad
+│   ├── variedad.py        # Variedad
+│   ├── volumen.py         # Volumen y proyecciones
+│   ├── rendimiento.py     # Benchmarks locales
+│   ├── velocidad.py       # Flujo sintético incremental
+│   ├── valor.py           # Análisis descriptivos
+│   └── visualizacion.py   # Figuras estáticas
+├── GUIA_EXPOSICION.md
 ├── main.py
+├── requirements.txt
 ├── README.md
-└── requirements.txt
+└── .gitignore
 ```
 
-## Preparación del entorno
+## Requisitos
 
-Se necesita Python 3. Desde la raíz del proyecto, crea un entorno virtual:
+- Git.
+- Python 3.10 o posterior.
+- Espacio suficiente para el dataset, los reportes y las imágenes.
+
+Las únicas dependencias directas son pandas y matplotlib.
+
+## Instalación
+
+### Linux o macOS
 
 ```bash
-python -m venv .venv
-```
-
-Actívalo en Linux o macOS:
-
-```bash
+git clone https://github.com/nekoscript-exe/SpotifyBigData.git
+cd SpotifyBigData
+python3 -m venv .venv
 source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-O en Windows (PowerShell):
+### Windows PowerShell
 
 ```powershell
+git clone https://github.com/nekoscript-exe/SpotifyBigData.git
+cd SpotifyBigData
+py -m venv .venv
 .venv\Scripts\Activate.ps1
-```
-
-Instala la dependencia:
-
-```bash
-python -m pip install -r requirements.txt
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
 ## Ejecución
 
+Con el entorno virtual activado, la ejecución oficial es:
+
 ```bash
-python main.py
+python3 main.py
 ```
 
-El diagnóstico informa dimensiones, variables, tipos de datos, tamaños,
-valores faltantes, duplicados, primeras filas y estadísticas descriptivas.
-También presenta en la terminal resúmenes de Veracidad, Variedad, Volumen,
-Velocidad y Valor. Los detalles se escriben en `outputs/reportes/`.
+El programa:
 
-## Veracidad
+1. carga el CSV sin modificarlo;
+2. presenta el diagnóstico y las cinco V en la terminal;
+3. ejecuta benchmarks locales y la simulación sintética;
+4. actualiza los CSV de `outputs/reportes/`;
+5. genera ocho PNG en `outputs/graficas/`.
 
-La Veracidad estudia qué tan confiables y consistentes son los datos antes de
-utilizarlos. El análisis implementado revisa:
+La ejecución completa tarda aproximadamente 11 segundos en el equipo usado
+durante el desarrollo. Los tiempos cambiarán entre equipos y ejecuciones.
 
-- valores faltantes por columna y las filas afectadas;
-- filas completamente duplicadas y sus grupos;
-- `track_id` repetidos y las variaciones de género, álbum, artista, nombre y
-  popularidad que existen dentro de cada ID;
-- rangos esperados para popularidad y características acústicas normalizadas;
-- duraciones, tempos y compases menores o iguales que cero;
-- distribuciones de `time_signature`, `mode` y `key`;
-- valores atípicos de `duration_ms`, `tempo` y `loudness` mediante el método
-  del rango intercuartílico (IQR).
+## Resultados principales
 
-Una fila completamente duplicada y un `track_id` repetido son conceptos
-distintos. Una canción puede aparecer en más de un género o contexto sin que
-sus filas sean idénticas.
+Esta selección resume resultados estables del dataset, no cifras externas de
+la plataforma Spotify:
 
-Los límites de IQR ayudan a localizar observaciones que merecen revisión, pero
-no demuestran que sean errores: **valor atípico != dato incorrecto**. De igual
-forma, un tempo o compás cero se reporta como potencialmente sospechoso, no
-como corrupción confirmada.
+| Resultado                        |    Valor | Naturaleza             |
+| -------------------------------- | -------: | ---------------------- |
+| Registros                        |  114,000 | Conteo real del CSV    |
+| Columnas                         |       20 | Conteo real del CSV    |
+| Tamaño en disco                 | 18.53 MB | Medición real         |
+| Memoria del DataFrame            | 48.79 MB | Medición local        |
+| `track_id` únicos             |   89,741 | Análisis descriptivo  |
+| Valores faltantes                |        3 | Análisis de Veracidad |
+| Duplicados exactos excedentes    |      450 | Análisis de Veracidad |
+| Géneros                         |      114 | Análisis descriptivo  |
+| Créditos artísticos distintos  |   31,437 | Análisis descriptivo  |
+| Álbumes distintos               |   46,589 | Análisis descriptivo  |
+| Tracks únicos marcados explicit |    8.58% | Análisis descriptivo  |
 
-Los reportes de esta sección son:
-
-```text
-outputs/reportes/calidad_columnas.csv
-outputs/reportes/filas_con_faltantes.csv
-outputs/reportes/duplicados_exactos.csv
-outputs/reportes/track_ids_repetidos.csv
-```
-
-`duplicados_exactos.csv` incluye tanto la primera aparición como sus copias
-para que cada grupo pueda inspeccionarse completo. La métrica de duplicados
-excedentes, en cambio, no cuenta la primera aparición de cada grupo.
-
-## Variedad
-
-La Variedad se observa en la combinación de diferentes representaciones y
-significados. El proyecto analiza dos perspectivas:
-
-- **tipo técnico:** `object`, enteros, decimales, booleanos y cualquier otro
-  dtype que pandas encuentre;
-- **significado semántico:** identificadores, texto, categorías, booleanos y
-  métricas numéricas.
-
-El dtype técnico no equivale al significado semántico. Por ejemplo, `key` se
-almacena como entero, pero conceptualmente representa una categoría musical.
-También se calculan la cardinalidad y el porcentaje de unicidad de cada
-columna, además de los dominios de variables como `explicit`, `mode` y
-`time_signature`.
-
-El detalle se guarda en:
-
-```text
-outputs/reportes/resumen_variedad.csv
-```
-
-## Volumen
-
-El análisis de Volumen calcula directamente sobre el dataset actual:
-
-- cantidad de registros y columnas;
-- tamaño del CSV serializado en disco;
-- memoria profunda utilizada por el DataFrame;
-- bytes promedio por fila en disco y en memoria;
-- factor de expansión entre el archivo y su representación en pandas.
-
-El tamaño del archivo serializado en disco no equivale necesariamente a la
-cantidad de RAM requerida para procesarlo. Los tipos internos de pandas, el
-índice y especialmente las cadenas de texto pueden aumentar el consumo en
-memoria.
-
-### Benchmarks locales
-
-La carga se mide sobre varias cantidades de filas y sobre el dataset completo.
-Se realiza una lectura breve de calentamiento y luego tres repeticiones por
-tamaño; el reporte conserva mediana, mínimo, máximo, throughput y memoria. Las
-operaciones `isna().sum()`, `duplicated().sum()`, `nunique()` y `describe()`
-también se miden tres veces de manera independiente.
-
-Los benchmarks dependen del equipo donde se ejecuta el proyecto. Además, la
-caché del sistema operativo puede acelerar lecturas posteriores, por lo que
-estas cifras muestran el comportamiento aproximado en el equipo local y no
-constituyen un benchmark científico universal del almacenamiento físico.
-
-Los reportes medidos son:
-
-```text
-outputs/reportes/benchmark_carga.csv
-outputs/reportes/benchmark_operaciones.csv
-```
-
-### Proyección de escalabilidad
-
-Se proyectan escalas desde x1 hasta x1,000,000 manteniendo fija la estructura
-y el número de columnas. Solo crece matemáticamente la cantidad de registros,
-el almacenamiento, la memoria y una estimación lineal del tiempo basada en la
-mediana de carga completa.
-
-No se concatenan DataFrames ni se crean archivos ampliados. Esto evita usar
-grandes cantidades de RAM o almacenamiento solo para una demostración.
-
-```text
-outputs/reportes/proyeccion_escalabilidad.csv
-```
-
-Las proyecciones representan estimaciones matemáticas y no mediciones de
-infraestructura real de Spotify. La estimación temporal tampoco implica que
-el rendimiento real vaya a crecer de manera perfectamente lineal.
-
-## Velocidad
-
-La V de Velocidad describe la rapidez con la que los datos llegan y deben ser
-procesados. El CSV original contiene características y metadatos de canciones,
-pero no eventos de reproducción, timestamps de usuarios ni un flujo en tiempo
-real. Por ello, esta etapa utiliza una simulación local simplificada.
-
-Cada evento tiene exactamente esta estructura:
-
-```text
-timestamp   datetime sintético, desde 2025-01-01 UTC
-user_id     identificador de usuario sintético
-track_id    identificador real extraído del CSV
-evento      play, pause, skip, like o add_to_playlist
-```
-
-La generación utiliza la semilla fija `42` y las siguientes probabilidades,
-elegidas únicamente para la demostración:
-
-```text
-play             45%
-pause            15%
-skip             25%
-like             10%
-add_to_playlist   5%
-```
-
-`generar_eventos()` es un generador de Python: produce un evento, lo entrega
-al procesador y continúa con el siguiente. El programa no crea una lista con
-todo el flujo. Solo conserva contadores de tipos y conjuntos pequeños de
-usuarios y canciones observados.
-
-El benchmark mide conjuntamente generación y procesamiento para 10,000,
-50,000, 100,000, 250,000 y 500,000 eventos, con tres repeticiones por tamaño.
-La escala de un millón se omite para mantener razonable la duración total de
-la exposición. Los reportes agregados son:
-
-```text
-outputs/reportes/benchmark_velocidad.csv
-outputs/reportes/resumen_eventos.csv
-```
-
-Conceptualmente, un proceso **batch** acumula datos y los procesa después. En
-esta simulación tipo **streaming**, cada evento se procesa conforme el
-generador lo produce. Esto no constituye un sistema distribuido real ni una
-conexión en tiempo real con Spotify.
-
-> Los eventos, usuarios, timestamps y probabilidades utilizados en esta
-> sección son sintéticos y se generan exclusivamente con fines académicos. Los
-> resultados no representan métricas de la infraestructura real de Spotify.
-
-## Valor
-
-La V de Valor responde qué información útil puede obtenerse de los datos. En
-esta etapa, los metadatos y atributos acústicos se convierten en comparaciones
-comprensibles sobre canciones, créditos artísticos, géneros, popularidad y
-grupos descriptivos.
-
-### Vista analítica de tracks únicos
-
-Una fila del CSV no equivale necesariamente a una canción distinta, ya que un
-mismo `track_id` puede aparecer asociado a varios géneros. Por eso se construye
-en memoria una vista con una fila por `track_id`, sin alterar el DataFrame ni
-el CSV originales. Antes de consolidarla se comprueba la consistencia de los
-metadatos y atributos que deberían permanecer fijos.
-
-Las columnas estables conservan su valor. `popularity` se resume mediante la
-mediana de cada `track_id`, una medida explícita y robusta ante sus distintas
-apariciones. Esas variaciones no se interpretan como evolución temporal porque
-el dataset carece de timestamps que permitan sostener esa conclusión.
-
-Los géneros se modelan por separado como una relación muchos-a-muchos. Los
-análisis utilizan asociaciones únicas `track_id + track_genre`, de modo que no
-se fuerza un solo género por canción ni se cuenta dos veces una relación
-idéntica. Todo esto constituye una transformación analítica temporal, no una
-limpieza del dataset fuente.
-
-### Análisis descriptivos
-
-La etapa calcula:
-
-- un panorama general de tracks, créditos, álbumes, popularidad, duración,
-  tempo, contenido explícito y características acústicas;
-- las canciones con mayor `popularity` dentro de este dataset;
-- créditos artísticos con más tracks y con mayor mediana de popularidad;
-- cantidad de tracks, popularidad y perfil acústico por género;
-- diferencias descriptivas entre tracks `explicit` y `no_explicit`;
-- correlaciones de Pearson entre `popularity` y atributos musicales;
-- el perfil del cuartil superior de popularidad frente al resto.
-
-La columna `artists` puede representar colaboraciones. Como separar sus
-componentes sería ambiguo sin una especificación formal, los valores se
-analizan como **créditos artísticos textuales**, exactamente como aparecen. La
-comparación de popularidad exige un mínimo de tracks por crédito: se usa el
-mayor valor entre cinco tracks y el percentil 90 de la distribución observada.
-
-El grupo de alta popularidad se define mediante el tercer cuartil calculado
-sobre la vista única, no mediante un umbral fijo elegido de antemano. Las
-diferencias son asociaciones descriptivas y no permiten atribuir causas.
-
-Los reportes preparados para análisis o visualizaciones posteriores son:
-
-```text
-outputs/reportes/resumen_valor.csv
-outputs/reportes/top_canciones_populares.csv
-outputs/reportes/top_artistas.csv
-outputs/reportes/analisis_generos.csv
-outputs/reportes/comparacion_explicit.csv
-outputs/reportes/correlaciones_popularidad.csv
-outputs/reportes/perfil_alta_popularidad.csv
-outputs/reportes/hallazgos_valor.csv
-```
-
-Los análisis son descriptivos y corresponden únicamente al dataset utilizado.
-No representan necesariamente el comportamiento actual de toda la plataforma
-Spotify.
-
-**Correlación no implica causalidad.**
+Los benchmarks no se fijan aquí como resultados universales porque dependen
+del equipo, la carga del sistema y la caché del sistema operativo.
 
 ## Visualizaciones
 
-La etapa de visualización transforma resultados ya calculados en ocho figuras
-estáticas preparadas para una exposición. No vuelve a implementar los análisis:
-`main.py` entrega a `visualizacion.py` los DataFrames de Veracidad, Volumen,
-Velocidad y Valor disponibles durante la misma ejecución.
+Las figuras son PNG de 1920×1120 a 160 dpi y se generan con el backend no
+interactivo `Agg`.
 
-Las imágenes se guardan automáticamente en `outputs/graficas/` como PNG a 160
-dpi. Se utiliza el backend no interactivo `Agg`, por lo que `python main.py`
-no abre ventanas ni requiere intervención manual.
+| Archivo                              | Tema                                | Naturaleza                            |
+| ------------------------------------ | ----------------------------------- | ------------------------------------- |
+| `01_proyeccion_volumen.png`        | Disco y RAM por escala              | x1 real; x10+ estimación matemática |
+| `02_benchmark_carga.png`           | Registros frente al tiempo de carga | Medición real local                  |
+| `03_velocidad_eventos.png`         | Eventos frente al tiempo            | Simulación sintética local          |
+| `04_calidad_datos.png`             | Indicadores de calidad              | Análisis descriptivo de datos reales |
+| `05_generos_popularidad.png`       | Top 10 de géneros                  | Análisis descriptivo                 |
+| `06_explicit_popularidad.png`      | Explicit frente a no explicit       | Análisis descriptivo                 |
+| `07_correlaciones_popularidad.png` | Correlaciones con popularidad       | Análisis descriptivo, no causal      |
+| `08_perfil_alta_popularidad.png`   | Cuartil superior frente al resto    | Análisis descriptivo                 |
 
-| Gráfica | Tema y V relacionada | Naturaleza |
-|---|---|---|
-| `01_proyeccion_volumen.png` | Disco y RAM por escala — Volumen | Medición real en x1 y proyección matemática desde x10 |
-| `02_benchmark_carga.png` | Tiempo de carga — Volumen | Medición real local |
-| `03_velocidad_eventos.png` | Eventos frente a tiempo — Velocidad | Simulación sintética local |
-| `04_calidad_datos.png` | Faltantes, duplicados y sospechas — Veracidad | Análisis descriptivo de datos reales |
-| `05_generos_popularidad.png` | Top 10 de géneros — Valor y Variedad | Análisis descriptivo |
-| `06_explicit_popularidad.png` | Explicit frente a no explicit — Valor | Análisis descriptivo |
-| `07_correlaciones_popularidad.png` | Popularidad y atributos — Valor | Análisis descriptivo; no causal |
-| `08_perfil_alta_popularidad.png` | Cuartil superior frente al resto — Valor | Análisis descriptivo |
+El catálogo completo se encuentra en
+`outputs/reportes/resumen_visualizaciones.csv`.
 
-La proyección de Volumen emplea ejes logarítmicos para representar órdenes de
-magnitud sin ocultar la medición base. El gráfico de calidad distingue los
-valores potencialmente sospechosos de las incidencias detectadas y no presenta
-outliers como errores. El perfil musical compara exclusivamente atributos
-normalizados; `tempo` y `duration_ms` se excluyen porque sus unidades harían
-engañosa una escala compartida.
+## Naturaleza de la evidencia
 
-El catálogo de figuras, su origen y la naturaleza de la evidencia queda
-registrado en:
+| Tipo                              | Qué significa aquí                                               | Ejemplos                                                  |
+| --------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------- |
+| **Medición real**          | Operación ejecutada sobre el archivo o equipo local               | Tamaño del CSV, RAM del DataFrame, benchmark de carga    |
+| **Simulación sintética**  | Eventos creados con reglas reproducibles para representar un flujo | Benchmark de Velocidad                                    |
+| **Proyección matemática** | Multiplicación de la medición base bajo supuestos constantes     | Escalas x10 a x1,000,000                                  |
+| **Análisis descriptivo**   | Resumen y comparación de los registros del dataset                | Géneros, popularidad, explicit, correlaciones y perfiles |
 
-```text
-outputs/reportes/resumen_visualizaciones.csv
-```
+Una medición local no describe todos los equipos; una simulación no es tráfico
+real; una proyección no es una prueba física; y una asociación descriptiva no
+demuestra causalidad.
 
-Las mediciones de carga dependen del equipo y de su caché. Los eventos de
-Velocidad son sintéticos y no representan la infraestructura real de Spotify.
-Las comparaciones de popularidad describen únicamente este dataset y no
-demuestran causalidad.
+## Reproducibilidad
 
-## Conservación de los datos
+- Las rutas se construyen desde la ubicación del proyecto mediante
+  `pathlib.Path`; no dependen del directorio personal del autor.
+- La simulación utiliza semilla y timestamp inicial fijos.
+- El CSV puede verificarse con el SHA-256 documentado anteriormente.
+- Los reportes y gráficas se regeneran con `python main.py`.
+- Los resultados analíticos son deterministas para el mismo CSV.
+- Los tiempos de benchmark pueden variar legítimamente por hardware, procesos
+  concurrentes y caché.
 
-En estas etapas no se modifica ni limpia el dataset original. No se rellenan
-faltantes, no se eliminan duplicados, no se corrigen valores sospechosos y no
-se descartan outliers. Tampoco se generan físicamente datasets escalados. Todos
-los resultados derivados se guardan fuera de `data/`. La simulación de
-Velocidad tampoco modifica el CSV ni guarda eventos individuales.
-La vista de tracks únicos y las relaciones track-género de Valor existen solo
-en memoria; tampoco reemplazan ni sobrescriben registros originales.
+## Limitaciones
+
+- 114,000 filas no convierten automáticamente al dataset en Big Data. El
+  proyecto demuestra conceptos y problemas de escala en un entorno académico.
+- El CSV es una muestra finita y no representa necesariamente el catálogo ni
+  el comportamiento actual de toda la plataforma Spotify.
+- No hay usuarios ni eventos reales; la etapa de Velocidad es sintética.
+- No hay timestamps históricos que permitan interpretar cambios de
+  `popularity` como evolución temporal.
+- Las proyecciones suponen estructura y costo por fila constantes; sistemas
+  reales pueden escalar de forma no lineal.
+- Los benchmarks son locales y no comparan la infraestructura del proyecto con
+  la de Spotify.
+- Las correlaciones y diferencias entre grupos son descriptivas y no permiten
+  afirmar causas ni preferencias de usuarios.
+- No se realiza limpieza definitiva, modelado predictivo ni recomendación.
+
+## Tecnologías utilizadas
+
+- **Python:** orquestación, simulación y biblioteca estándar.
+- **pandas:** carga, agregaciones, calidad, cardinalidad y reportes CSV.
+- **matplotlib:** ocho visualizaciones estáticas.
+- **Git:** control de versiones y flujo de trabajo por ramas.
+- **Pyright/Pylance:** validación estática del código.
+
+Para preparar la defensa del proyecto, consulta
+[`GUIA_EXPOSICION.md`](GUIA_EXPOSICION.md).
